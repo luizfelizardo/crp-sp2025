@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Preparatório - Concurso CRP-SP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Calm Neutrals -->
+    <!-- Application Structure Plan: A quiz-centric SPA. The main view is an interactive quiz generator. A persistent sidebar allows non-linear navigation to dedicated study sections for each of the 11 IT topics. This structure prioritizes active learning (quizzing) over passive reading, while still making the detailed study material easily accessible. The key interaction is a 'Dica/Saiba Mais' button on each quiz question, which directly links the question to its underlying concept in the study material, reinforcing learning. -->
+    <!-- Visualization & Content Choices: Report Info: 11 IT topics with explanatory text and summary tables. Goal: Inform & Test. Viz/Presentation: The core is an interactive quiz built with HTML/JS. Explanatory text is presented in clean, readable sections. Summary tables are recreated as styled HTML tables. Interaction: Users select topics for the quiz, answer questions, and get immediate feedback. A 'Saiba Mais' button links questions to detailed explanations. Justification: This interactive quiz format is more engaging and effective for exam preparation than a static document. No charts are needed as the source material is qualitative. Library/Method: Vanilla JS for all logic, Tailwind CSS for styling. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .nav-link.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn.correct {
+            background-color: #22c55e !important;
+            color: white !important;
+            border-color: #16a34a !important;
+        }
+        .option-btn.incorrect {
+            background-color: #ef4444 !important;
+            color: white !important;
+            border-color: #dc2626 !important;
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <nav id="sidebar" class="w-full md:w-64 bg-white shadow-lg flex-shrink-0">
+            <div class="p-4 border-b">
+                <h1 class="text-xl font-bold text-blue-600">Estudo CRP-SP TI</h1>
+                <p class="text-sm text-slate-500">Menu de Tópicos</p>
+            </div>
+            <div class="p-2 space-y-1">
+                 <a href="#quiz" data-section="quiz-section" class="nav-link block w-full text-left px-4 py-2 rounded-md font-medium text-slate-700 hover:bg-blue-500 hover:text-white transition-colors duration-200 active">
+                    <span class="mr-2">🧠</span> Quiz Interativo
+                </a>
+                <a href="#fundamentos" data-section="fundamentos" class="nav-link block w-full text-left px-4 py-2 rounded-md font-medium text-slate-700 hover:bg-blue-500 hover:text-white transition-colors duration-200">
+                    <span class="mr-2">💻</span> Fundamentos
+                </a>
+                <a href="#sistemas" data-section="sistemas" class="nav-link block w-full text-left px-4 py-2 rounded-md font-medium text-slate-700 hover:bg-blue-500 hover:text-white transition-colors duration-200">
+                    <span class="mr-2">📀</span> Sistemas Operacionais
+                </a>
+                <a href="#redes" data-section="redes" class="nav-link block w-full text-left px-4 py-2 rounded-md font-medium text-slate-700 hover:bg-blue-500 hover:text-white transition-colors duration-200">
+                    <span class="mr-2">🌐</span> Redes de Computadores
+                </a>
+                <a href="#seguranca" data-section="seguranca" class="nav-link block w-full text-left px-4 py-2 rounded-md font-medium text-slate-700 hover:bg-blue-500 hover:text-white transition-colors duration-200">
+                    <span class="mr-2">🛡️</span> Segurança da Informação
+                </a>
+                <a href="#banco" data-section="banco" class="nav-link block w-full text-left px-4 py-2 rounded-md font-medium text-slate-700 hover:bg-blue-500 hover:text-white transition-colors duration-200">
+                    <span class="mr-2">🗃️</span> Banco de Dados
+                </a>
+                <a href="#web" data-section="web" class="nav-link block w-full text-left px-4 py-2 rounded-md font-medium text-slate-700 hover:bg-blue-500 hover:text-white transition-colors duration-200">
+                    <span class="mr-2">🎨</span> Desenvolvimento Web
+                </a>
+                <a href="#governanca" data-section="governanca" class="nav-link block w-full text-left px-4 py-2 rounded-md font-medium text-slate-700 hover:bg-blue-500 hover:text-white transition-colors duration-200">
+                    <span class="mr-2">🏛️</span> Governança de TI
+                </a>
+                <a href="#infra" data-section="infra" class="nav-link block w-full text-left px-4 py-2 rounded-md font-medium text-slate-700 hover:bg-blue-500 hover:text-white transition-colors duration-200">
+                    <span class="mr-2">🏗️</span> Infraestrutura e Serviços
+                </a>
+                <a href="#projetos" data-section="projetos" class="nav-link block w-full text-left px-4 py-2 rounded-md font-medium text-slate-700 hover:bg-blue-500 hover:text-white transition-colors duration-200">
+                    <span class="mr-2">📈</span> Gestão de Projetos
+                </a>
+                 <a href="#integracao" data-section="integracao" class="nav-link block w-full text-left px-4 py-2 rounded-md font-medium text-slate-700 hover:bg-blue-500 hover:text-white transition-colors duration-200">
+                    <span class="mr-2">🔗</span> Integração de Sistemas
+                </a>
+                <a href="#suporte" data-section="suporte" class="nav-link block w-full text-left px-4 py-2 rounded-md font-medium text-slate-700 hover:bg-blue-500 hover:text-white transition-colors duration-200">
+                    <span class="mr-2">🛠️</span> Suporte e Manutenção
+                </a>
+            </div>
+        </nav>
+
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+            
+            <div id="quiz-section" class="content-section active">
+                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <h2 class="text-2xl font-bold mb-2">Quiz Interativo Preparatório</h2>
+                    <p class="text-slate-600">Teste seus conhecimentos para o concurso do CRP-SP. Selecione os tópicos que deseja incluir no quiz, escolha o número de questões e comece a praticar. Cada pergunta oferece uma dica ou explicação detalhada para reforçar seu aprendizado.</p>
+                </div>
+                
+                <div id="quiz-setup" class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 border-b pb-2">Configurar Quiz</h3>
+                    <div class="mb-4">
+                        <label class="block font-medium mb-2">Selecione os tópicos:</label>
+                        <div id="topic-selection" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="num-questions" class="block font-medium mb-2">Número de questões:</label>
+                        <select id="num-questions" class="w-full p-2 border rounded-md bg-slate-50">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                        </select>
+                    </div>
+                    <button id="start-quiz-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-md">
+                        Iniciar Quiz
+                    </button>
+                </div>
+
+                <div id="quiz-container" class="hidden">
+                    <div class="flex justify-between items-center mb-4">
+                         <h3 class="text-xl font-semibold">Questão <span id="question-number"></span> de <span id="total-questions"></span></h3>
+                         <div class="text-lg font-bold">Pontuação: <span id="score">0</span></div>
+                    </div>
+                    <div id="question-card" class="bg-white p-6 rounded-lg shadow-md">
+                        <p id="question-text" class="text-lg font-medium mb-6"></p>
+                        <div id="options-container" class="space-y-3"></div>
+                    </div>
+                    <div id="feedback-container" class="mt-4 p-4 rounded-lg hidden">
+                        <h4 class="font-bold text-lg mb-2">Gabarito e Dica</h4>
+                        <p id="feedback-text"></p>
+                        <button id="show-hint-btn" class="mt-3 text-sm bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-md hover:bg-slate-300">
+                            Ver Explicação Completa
+                        </button>
+                    </div>
+                     <div class="mt-6 flex justify-between">
+                        <button id="restart-quiz-btn" class="bg-slate-500 text-white font-bold py-2 px-5 rounded-lg hover:bg-slate-600 transition-colors">
+                            Reiniciar
+                        </button>
+                        <button id="next-question-btn" class="bg-blue-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-blue-700 transition-colors hidden">
+                            Próxima Questão
+                        </button>
+                    </div>
+                </div>
+
+                <div id="quiz-results" class="hidden bg-white p-6 rounded-lg shadow-md text-center">
+                    <h3 class="text-2xl font-bold mb-4">Quiz Finalizado!</h3>
+                    <p class="text-lg mb-2">Sua pontuação final foi:</p>
+                    <p class="text-5xl font-bold text-blue-600 mb-6"><span id="final-score"></span> / <span id="total-score"></span></p>
+                    <button id="play-again-btn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                        Jogar Novamente
+                    </button>
+                </div>
+
+                <div id="hint-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+                    <div class="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col">
+                        <div class="p-4 border-b flex justify-between items-center">
+                            <h3 class="text-xl font-bold">Explicação do Tópico</h3>
+                            <button id="close-hint-modal" class="text-2xl font-bold text-slate-500 hover:text-slate-800">&times;</button>
+                        </div>
+                        <div id="hint-content" class="p-6 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="fundamentos" class="content-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">Fundamentos de Computação</h2>
+                <p class="mb-4 text-slate-600">A evolução da tecnologia e a migração de ambientes para a nuvem exigiram que os profissionais de TI dominassem a gestão de recursos abstratos. As provas de hoje refletem esse novo paradigma, explorando conceitos como virtualização, computação em nuvem e arquiteturas modernas.</p>
+                <h3 class="text-xl font-semibold mt-6 mb-2">Computação em Nuvem</h3>
+                <p class="mb-4 text-slate-600">É crucial entender os modelos de serviço: IaaS (Infraestrutura como Serviço), PaaS (Plataforma como Serviço) e SaaS (Software como Serviço). A prova pode apresentar cenários práticos, por exemplo, a escolha do modelo ideal para um projeto de desenvolvimento de software. A PaaS, que abstrai a infraestrutura e o sistema operacional, é a opção mais adequada para desenvolvedores que precisam focar apenas no código, diferentemente da IaaS, que transfere o gerenciamento do sistema operacional e da infraestrutura para o cliente.</p>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-500">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">Característica</th>
+                                <th scope="col" class="px-6 py-3">IaaS</th>
+                                <th scope="col" class="px-6 py-3">PaaS</th>
+                                <th scope="col" class="px-6 py-3">SaaS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-white border-b">
+                                <td class="px-6 py-4 font-medium">O que fornece?</td>
+                                <td class="px-6 py-4">Máquinas virtuais, armazenamento, redes.</td>
+                                <td class="px-6 py-4">Ambiente de desenvolvimento, banco de dados.</td>
+                                <td class="px-6 py-4">Aplicativos completos e prontos para uso.</td>
+                            </tr>
+                            <tr class="bg-slate-50 border-b">
+                                <td class="px-6 py-4 font-medium">Responsabilidade do Cliente</td>
+                                <td class="px-6 py-4">Gerenciar SO, aplicações, dados.</td>
+                                <td class="px-6 py-4">Gerenciar apenas a aplicação e os dados.</td>
+                                <td class="px-6 py-4">Apenas usar o aplicativo.</td>
+                            </tr>
+                             <tr class="bg-white border-b">
+                                <td class="px-6 py-4 font-medium">Exemplo de Serviço</td>
+                                <td class="px-6 py-4">Amazon EC2, Azure VMs.</td>
+                                <td class="px-6 py-4">Heroku, Google App Engine.</td>
+                                <td class="px-6 py-4">Microsoft 365, Google Workspace.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="sistemas" class="content-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">Sistemas Operacionais</h2>
+                <p class="mb-4 text-slate-600">Um profissional de TI para órgãos públicos deve ter domínio de diferentes sistemas operacionais, pois a infraestrutura corporativa é frequentemente um ambiente híbrido.</p>
+                <h3 class="text-xl font-semibold mt-6 mb-2">Active Directory (AD)</h3>
+                <p class="mb-4 text-slate-600">O AD, um serviço de diretório da Microsoft, é fundamental para centralizar a gestão de usuários, grupos, computadores e permissões em uma rede Windows. A forma mais comum de aplicar configurações e políticas de segurança em larga escala é por meio de Objetos de Política de Grupo, as GPOs.</p>
+                 <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-500">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">Componente</th>
+                                <th scope="col" class="px-6 py-3">Função Primária</th>
+                                <th scope="col" class="px-6 py-3">Importância</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-white border-b">
+                                <td class="px-6 py-4 font-medium">Controlador de Domínio (DC)</td>
+                                <td class="px-6 py-4">Servidor que hospeda a base de dados do AD.</td>
+                                <td class="px-6 py-4">Essencial para autenticação e autorização.</td>
+                            </tr>
+                            <tr class="bg-slate-50 border-b">
+                                <td class="px-6 py-4 font-medium">Política de Grupo (GPO)</td>
+                                <td class="px-6 py-4">Conjunto de configurações de controle.</td>
+                                <td class="px-6 py-4">Automatiza a aplicação de políticas de segurança.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="redes" class="content-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">Redes de Computadores</h2>
+                <p class="mb-4 text-slate-600">O conhecimento dos modelos de referência OSI e TCP/IP é fundamental. A distinção mais comum em provas é que os **switches** operam na camada de enlace (camada 2 do OSI), interligando dispositivos em uma rede local com base em endereços MAC, enquanto os **roteadores** operam na camada de rede (camada 3), conectando redes diferentes com base em endereços IP.</p>
+            </div>
+            
+            <div id="seguranca" class="content-section bg-white p-6 rounded-lg shadow-md">
+                 <h2 class="text-2xl font-bold mb-4 border-b pb-2">Segurança da Informação</h2>
+                 <p class="mb-4 text-slate-600">O candidato deve ser capaz de identificar e distinguir os diferentes tipos de ataques. O **ransomware**, por exemplo, é um tipo de ataque que criptografa os dados da vítima e exige um pagamento para restaurar o acesso. O **phishing**, um ataque de engenharia social, busca enganar o usuário por meio de e-mails ou sites falsos para roubar informações confidenciais, como senhas e dados bancários.</p>
+            </div>
+
+            <div id="banco" class="content-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">Banco de Dados</h2>
+                <p class="mb-4 text-slate-600">A normalização de dados é um conceito central para o modelo relacional, pois visa reduzir a redundância e melhorar a integridade dos dados. As provas exigem a compreensão das Formas Normais (1FN, 2FN, 3FN).</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-500">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">Forma Normal</th>
+                                <th scope="col" class="px-6 py-3">O que Corrige</th>
+                                <th scope="col" class="px-6 py-3">Regra</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-white border-b">
+                                <td class="px-6 py-4 font-medium">1ª FN</td>
+                                <td class="px-6 py-4">Grupos repetitivos e valores não atômicos.</td>
+                                <td class="px-6 py-4">Cada coluna deve conter valores únicos e indivisíveis.</td>
+                            </tr>
+                            <tr class="bg-slate-50 border-b">
+                                <td class="px-6 py-4 font-medium">2ª FN</td>
+                                <td class="px-6 py-4">Dependências parciais.</td>
+                                <td class="px-6 py-4">Todos os atributos não-chave devem depender inteiramente da chave primária.</td>
+                            </tr>
+                             <tr class="bg-white border-b">
+                                <td class="px-6 py-4 font-medium">3ª FN</td>
+                                <td class="px-6 py-4">Dependências transitivas.</td>
+                                <td class="px-6 py-4">Nenhum atributo não-chave deve depender de outro atributo não-chave.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="web" class="content-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">Desenvolvimento Web e Acessibilidade</h2>
+                <p class="mb-4 text-slate-600">A acessibilidade web é um tópico de grande relevância, especialmente para websites de governo. As questões podem abordar a importância de práticas como a adição de descrições textuais em imagens. A marcação `alt` (texto alternativo) é um atributo fundamental do HTML que permite que leitores de tela descrevam o conteúdo de uma imagem para usuários com deficiência visual.</p>
+            </div>
+
+            <div id="governanca" class="content-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">Governança de TI</h2>
+                <p class="mb-4 text-slate-600">As questões frequentemente comparam os frameworks, testando o entendimento de que o **ITIL** é sobre a gestão de serviços, enquanto o **COBIT** é sobre a governança e o controle estratégico da TI.</p>
+            </div>
+
+            <div id="infra" class="content-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">Infraestrutura e Serviços</h2>
+                <p class="mb-4 text-slate-600">A alta disponibilidade é um pilar da infraestrutura moderna. O **balanceamento de carga** é a técnica que distribui as requisições de forma inteligente entre múltiplos servidores. Por outro lado, o **failover** é a característica que permite a alternância automática para um sistema de backup em caso de falha do principal.</p>
+            </div>
+
+            <div id="projetos" class="content-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">Gestão de Projetos em TI</h2>
+                <p class="mb-4 text-slate-600">O **Scrum** é um framework que se baseia em iterações curtas (sprints), com papéis e cerimônias bem definidos (como o daily Scrum). O objetivo da reunião diária é que a equipe sincronize suas atividades e planeje o trabalho das próximas 24 horas.</p>
+            </div>
+
+            <div id="integracao" class="content-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">Integração de Sistemas</h2>
+                <p class="mb-4 text-slate-600">Uma das comparações mais comuns em provas é entre REST e SOAP. O **SOAP** é um protocolo com uma estrutura rígida que usa o formato de mensagem XML. Por outro lado, o **REST** é um estilo arquitetural que se baseia em métodos HTTP e usa formatos de dados leves, como JSON, sendo mais flexível, rápido e escalável.</p>
+            </div>
+            
+            <div id="suporte" class="content-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">Suporte e Manutenção de Sistemas</h2>
+                <p class="mb-4 text-slate-600">O troubleshooting é a metodologia de análise e resolução de problemas técnicos. As provas podem apresentar cenários para que o candidato identifique a primeira etapa de uma metodologia de resolução de problemas, que é a **"identificação do problema"** com base nos sintomas e relatos do usuário.</p>
+            </div>
+
+        </main>
+    </div>
+
+<script>
+const quizData = [
+    {
+        topic: "Fundamentos",
+        question: "Qual modelo de serviço de computação em nuvem permite que o cliente gerencie a infraestrutura física e o sistema operacional?",
+        options: ["PaaS (Platform as a Service)", "IaaS (Infrastructure as a Service)", "SaaS (Software as a Service)", "FaaS (Function as a Service)"],
+        answer: 1,
+        hintId: "fundamentos"
+    },
+    {
+        topic: "Fundamentos",
+        question: "Qual modelo de serviço de computação em nuvem abstrai a infraestrutura e o sistema operacional, permitindo que os desenvolvedores se concentrem apenas no código?",
+        options: ["PaaS (Platform as a Service)", "IaaS (Infrastructure as a Service)", "SaaS (Software as a Service)", "FaaS (Function as a Service)"],
+        answer: 0,
+        hintId: "fundamentos"
+    },
+    {
+        topic: "Fundamentos",
+        question: "Qual modelo de serviço de computação em nuvem é mais adequado para empresas que desejam desenvolver e implantar aplicativos sem se preocupar com a infraestrutura subjacente?",
+        options: ["PaaS (Platform as a Service)", "IaaS (Infrastructure as a Service)", "SaaS (Software as a Service)", "FaaS (Function as a Service)"],
+        answer: 0,
+        hintId: "fundamentos"
+    },
+    {
+        topic: "Fundamentos",
+        question: "Qual modelo de serviço de computação em nuvem oferece aplicativos prontos para uso, como e-mail e colaboração, sem necessidade de instalação local?",
+        options: ["PaaS (Platform as a Service)", "IaaS (Infrastructure as a Service)", "SaaS (Software as a Service)", "FaaS (Function as a Service)"],
+        answer: 2,
+        hintId: "fundamentos"
+    },
+    {
+        topic: "Fundamentos",
+        question: "Qual modelo de serviço de computação em nuvem permite que os usuários acessem aplicativos e serviços pela internet, sem a necessidade de instalação local?",
+        options: ["PaaS (Platform as a Service)", "IaaS (Infrastructure as a Service)", "SaaS (Software as a Service)", "FaaS (Function as a Service)"],
+        answer: 2,
+        hintId: "fundamentos"
+    },
+    {
+        topic: "Fundamentos",
+        question: "Qual modelo de serviço de computação em nuvem é mais adequado para empresas que desejam alugar recursos de computação, como servidores e armazenamento, sem gerenciar a infraestrutura física?",
+        options: ["PaaS (Platform as a Service)", "IaaS (Infrastructure as a Service)", "SaaS (Software as a Service)", "FaaS (Function as a Service)"],
+        answer: 1,
+        hintId: "fundamentos"
+    },
+    {
+        topic: "Fundamentos",
+        question: "Qual modelo de serviço de computação em nuvem permite que os desenvolvedores criem, testem e implantem aplicativos sem se preocupar com a infraestrutura subjacente?",
+        options: ["PaaS (Platform as a Service)", "IaaS (Infrastructure as a Service)", "SaaS (Software as a Service)", "FaaS (Function as a Service)"],
+        answer: 0,
+        hintId: "fundamentos"
+    },
+    {
+        topic: "Fundamentos",
+        question: "Qual modelo de serviço de computação em nuvem é mais adequado para empresas que desejam alugar recursos de computação, como servidores e armazenamento, sem gerenciar a infraestrutura física?",
+        options: ["PaaS (Platform as a Service)", "IaaS (Infrastructure as a Service)", "SaaS (Software as a Service)", "FaaS (Function as a Service)"],
+        answer: 1,
+        hintId: "fundamentos"
+    },
+    {
+        topic: "Fundamentos",
+        question: "Em relação aos modelos de serviço de computação em nuvem, qual descreve um ambiente onde o cliente tem controle total sobre o sistema operacional, mas a infraestrutura física é gerenciada pelo provedor?",
+        options: ["PaaS (Platform as a Service)", "IaaS (Infrastructure as a Service)", "SaaS (Software as a Service)", "FaaS (Function as a Service)"],
+        answer: 1,
+        hintId: "fundamentos"
+    },
+    {
+        topic: "Sistemas Operacionais",
+        question: "Qual é a principal função do Active Directory em um ambiente Windows?",
+        options: ["Gerenciar redes sem fio", "Fornecer serviços de e-mail", "Centralizar a gestão de usuários e permissões", "Monitorar o tráfego de rede"],
+        answer: 2,
+        hintId: "sistemas"
+    },
+    {
+        topic: "Sistemas Operacionais",
+        question: "Em uma rede Windows, qual a maneira correta de aplicar uma política de segurança para todos os usuários e computadores de forma centralizada e automática a partir de um controlador de domínio?",
+        options: ["Scripts de logon via SSH", "Diretivas de Firewall", "Políticas de Grupo (GPO) no Active Directory", "Políticas locais do servidor"],
+        answer: 2,
+        hintId: "sistemas"
+    },
+    {
+        topic: "Sistemas Operacionais",
+        question: "Qual é a principal função de um Controlador de Domínio (DC) no Active Directory?",
+        options: ["Gerenciar o tráfego de rede", "Armazenar e gerenciar a base de dados do AD", "Fornecer serviços de DNS", "Monitorar o desempenho do servidor"],
+        answer: 1,
+        hintId: "sistemas"
+    },
+    {
+        topic: "Sistemas Operacionais",
+        question: "Qual é a principal função das Políticas de Grupo (GPO) no Active Directory?",
+        options: ["Gerenciar o tráfego de rede", "Aplicar configurações e políticas de segurança em larga escala", "Fornecer serviços de DNS", "Monitorar o desempenho do servidor"],
+        answer: 1,
+        hintId: "sistemas"
+    },
+    {   topic: "Sistemas Operacionais",
+        question: "Qual é a principal função do Active Directory em um ambiente Windows?",
+        options: ["Gerenciar redes sem fio", "Fornecer serviços de e-mail", "Centralizar a gestão de usuários e permissões", "Monitorar o tráfego de rede"],
+        answer: 2,
+        hintId: "sistemas"
+    },
+    {
+        topic: "Sistemas Operacionais",
+        question: "Qual é a principal função do Active Directory em um ambiente Windows?",
+        options: ["Gerenciar redes sem fio", "Fornecer serviços de e-mail", "Centralizar a gestão de usuários e permissões", "Monitorar o tráfego de rede"],
+        answer: 2,
+        hintId: "sistemas"
+    },
+    {
+        topic: "Redes",
+        question: "Qual dispositivo opera na camada de enlace (camada 2 do OSI) para interligar dispositivos em uma rede local usando endereços MAC?",
+        options: ["Switch", "Roteador", "Hub", "Repetidor"],
+        answer: 0,
+        hintId: "redes"
+    },
+    
+   
+   
+    {
+        topic: "Redes",
+        question: "Qual dispositivo opera na camada de rede (camada 3 do OSI) para conectar redes diferentes usando endereços IP?",
+        options: ["Switch", "Hub", "Roteador", "Repetidor"],
+        answer: 2,
+        hintId: "redes"
+    },
+   
+  
+   
+    
+    {
+        topic: "Segurança",
+        question: "Qual ataque cibernético usa engenharia social, geralmente por e-mail, para roubar informações confidenciais como senhas?",
+        options: ["Ransomware", "Phishing", "Ataque DDoS", "Man-in-the-middle"],
+        answer: 1,
+        hintId: "seguranca"
+    },
+    {
+        topic: "Segurança",
+        question: "Qual ataque cibernético criptografa os dados da vítima e exige um pagamento para restaurar o acesso?",
+        options: ["Ransomware", "Phishing", "Ataque", "Keylogger"],
+        answer: 0,
+        hintId: "seguranca"
+    },
+    
+    {
+        topic: "Banco de Dados",
+        question: "Qual Forma Normal (FN) visa corrigir 'dependências parciais', onde um atributo não-chave depende apenas de parte da chave primária?",
+        options: ["1ª FN", "2ª FN", "3ª FN", "4ª FN"],
+        answer: 1,
+        hintId: "banco"
+    },
+    
+    {
+        topic: "Banco de Dados",
+        question: "Qual Forma Normal (FN) visa corrigir 'grupos repetitivos' e garantir que cada coluna contenha valores únicos e indivisíveis?",
+        options: ["1ª FN", "2ª FN", "3ª FN", "4ª FN"],
+        answer: 0,
+        hintId: "banco"
+    },
+    {
+        topic: "Banco de Dados",
+        question: "Qual Forma Normal (FN) visa corrigir 'dependências transitivas', onde um atributo não-chave depende de outro atributo não-chave?",
+        options: ["1ª FN", "2ª FN", "3ª FN", "4ª FN"],
+        answer: 2,
+        hintId: "banco"
+    },
+    
+    {
+        topic: "Desenvolvimento Web",
+        question: "Qual atributo HTML é fundamental para descrever o conteúdo de imagens, garantindo acessibilidade para usuários com deficiência visual?",
+        options: ["src", "title", "href", "alt"],
+        answer: 3,
+        hintId: "web"
+    },
+
+    {
+        topic: "Desenvolvimento Web",
+        question: "Para garantir a acessibilidade para usuários com deficiência visual, qual atributo HTML é fundamental para descrever o conteúdo de imagens?",
+        options: ["src", "title", "href", "alt"],
+        answer: 3,
+        hintId: "web"
+    },
+
+    {
+        topic: "Governança de TI",
+        question: "Qual framework é mais focado em governança e alinhamento estratégico da TI com o negócio, gerenciando riscos e criação de valor?",
+        options: ["ITIL v4", "COBIT 2019", "PMBOK", "Scrum"],
+        answer: 1,
+        hintId: "governanca"
+    },
+    
+    {
+        topic: "Infraestrutura",
+        question: "A característica de um sistema que permite a um servidor de backup assumir automaticamente em caso de falha do principal é chamada de:",
+        options: ["Balanceamento de carga", "Escalabilidade", "Failover", "Virtualização"],
+        answer: 2,
+        hintId: "infra"
+    },
+    {
+        topic: "Gestão de Projetos",
+        question: "Na metodologia Scrum, qual o principal objetivo da reunião diária (daily Scrum)?",
+        options: ["Resolver problemas de programação", "Apresentar o status para os stakeholders", "Sincronizar a equipe e planejar as próximas 24h", "Definir o escopo do sprint"],
+        answer: 2,
+        hintId: "projetos"
+    },
+    {
+        topic: "Integração de Sistemas",
+        question: "Qual é a principal vantagem do estilo arquitetural REST sobre o protocolo SOAP em termos de flexibilidade de formato de dados?",
+        options: ["REST usa apenas XML", "REST suporta múltiplos formatos como JSON e XML", "REST é mais seguro por padrão", "REST é stateful"],
+        answer: 1,
+        hintId: "integracao"
+    },
+
+
+
+    {
+        topic: "Suporte e Manutenção",
+        question: "Qual é a primeira e mais crucial etapa em uma metodologia de troubleshooting eficaz?",
+        options: ["Reinstalar o sistema", "Executar um antivírus", "Identificar e definir o problema", "Escalar o chamado"],
+        answer: 2,
+        hintId: "suporte"
+    },
+
+    {
+        topic: "Suporte e Manutenção",
+        question: "Qual é a primeira etapa de uma metodologia de resolução de problemas técnicos?",
+        options: ["Identificação do problema", "Reinstalação do sistema", "Escalonamento para o suporte técnico", "Reinicialização do dispositivo"],
+        answer: 0,
+        hintId: "suporte"
+    },
+
+    
+];
+
+const topics = [
+    { id: "Fundamentos", name: "Fundamentos", emoji: "💻" },
+    { id: "Sistemas Operacionais", name: "Sist. Operacionais", emoji: "📀" },
+    { id: "Redes", name: "Redes", emoji: "🌐" },
+    { id: "Segurança", name: "Segurança", emoji: "🛡️" },
+    { id: "Banco de Dados", name: "Banco de Dados", emoji: "🗃️" },
+    { id: "Desenvolvimento Web", name: "Web Dev", emoji: "🎨" },
+    { id: "Governança de TI", name: "Governança", emoji: "🏛️" },
+    { id: "Infraestrutura", name: "Infraestrutura", emoji: "🏗️" },
+    { id: "Gestão de Projetos", name: "Projetos", emoji: "📈" },
+    { id: "Integração de Sistemas", name: "Integração", emoji: "🔗" },
+    { id: "Suporte e Manutenção", name: "Suporte", emoji: "🛠️" }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const contentSections = document.querySelectorAll('.content-section');
+    const topicSelectionContainer = document.getElementById('topic-selection');
+    const startQuizBtn = document.getElementById('start-quiz-btn');
+    const quizSetup = document.getElementById('quiz-setup');
+    const quizContainer = document.getElementById('quiz-container');
+    const quizResults = document.getElementById('quiz-results');
+    const questionNumberEl = document.getElementById('question-number');
+    const totalQuestionsEl = document.getElementById('total-questions');
+    const scoreEl = document.getElementById('score');
+    const questionTextEl = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const feedbackContainer = document.getElementById('feedback-container');
+    const feedbackTextEl = document.getElementById('feedback-text');
+    const showHintBtn = document.getElementById('show-hint-btn');
+    const nextQuestionBtn = document.getElementById('next-question-btn');
+    const restartQuizBtn = document.getElementById('restart-quiz-btn');
+    const playAgainBtn = document.getElementById('play-again-btn');
+    const hintModal = document.getElementById('hint-modal');
+    const hintContent = document.getElementById('hint-content');
+    const closeHintModalBtn = document.getElementById('close-hint-modal');
+
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    function setupNavigation() {
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const sectionId = link.dataset.section;
+                
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === sectionId) {
+                        section.classList.add('active');
+                    }
+                });
+            });
+        });
+    }
+
+    function populateTopicSelection() {
+        topicSelectionContainer.innerHTML = topics.map(topic => `
+            <label class="flex items-center p-2 border rounded-md cursor-pointer hover:bg-slate-100">
+                <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 rounded" value="${topic.id}" checked>
+                <span class="ml-2 text-slate-700">${topic.emoji} ${topic.name}</span>
+            </label>
+        `).join('');
+    }
+
+    function startQuiz() {
+        const selectedTopics = Array.from(topicSelectionContainer.querySelectorAll('input:checked')).map(input => input.value);
+        const numQuestions = parseInt(document.getElementById('num-questions').value);
+
+        if (selectedTopics.length === 0) {
+            alert("Por favor, selecione pelo menos um tópico.");
+            return;
+        }
+
+        let filteredQuestions = quizData.filter(q => selectedTopics.includes(q.topic));
+        
+        if (filteredQuestions.length === 0) {
+            alert("Não há questões para os tópicos selecionados. Por favor, escolha outros.");
+            return;
+        }
+
+        currentQuestions = shuffleArray(filteredQuestions).slice(0, numQuestions);
+        
+        if (currentQuestions.length === 0) {
+             alert(`Não foi possível encontrar ${numQuestions} questões. Tente selecionar mais tópicos ou um número menor de questões.`);
+             return;
+        }
+
+        currentQuestionIndex = 0;
+        score = 0;
+
+        quizSetup.classList.add('hidden');
+        quizResults.classList.add('hidden');
+        quizContainer.classList.remove('hidden');
+        
+        updateScore();
+        displayQuestion();
+    }
+
+    function displayQuestion() {
+        feedbackContainer.classList.add('hidden');
+        nextQuestionBtn.classList.add('hidden');
+
+        const question = currentQuestions[currentQuestionIndex];
+        questionNumberEl.textContent = currentQuestionIndex + 1;
+        totalQuestionsEl.textContent = currentQuestions.length;
+        questionTextEl.textContent = question.question;
+
+        optionsContainer.innerHTML = '';
+        question.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.textContent = option;
+            button.classList.add('option-btn', 'block', 'w-full', 'p-3', 'text-left', 'border', 'rounded-lg', 'bg-white', 'hover:bg-blue-100', 'hover:border-blue-400', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-400');
+            button.dataset.index = index;
+            button.addEventListener('click', selectAnswer);
+            optionsContainer.appendChild(button);
+        });
+    }
+
+    function selectAnswer(e) {
+        const selectedButton = e.target;
+        const selectedIndex = parseInt(selectedButton.dataset.index);
+        const question = currentQuestions[currentQuestionIndex];
+        const isCorrect = selectedIndex === question.answer;
+
+        if (isCorrect) {
+            score++;
+            selectedButton.classList.add('correct');
+        } else {
+            selectedButton.classList.add('incorrect');
+            optionsContainer.querySelector(`[data-index='${question.answer}']`).classList.add('correct');
+        }
+        
+        updateScore();
+        disableOptions();
+        showFeedback(isCorrect, question);
+    }
+
+    function disableOptions() {
+        optionsContainer.querySelectorAll('.option-btn').forEach(btn => {
+            btn.disabled = true;
+        });
+    }
+
+    function showFeedback(isCorrect, question) {
+        feedbackContainer.classList.remove('hidden');
+        feedbackTextEl.textContent = isCorrect ? "Resposta correta!" : `A resposta correta é: "${question.options[question.answer]}"`;
+        showHintBtn.dataset.hintId = question.hintId;
+        nextQuestionBtn.classList.remove('hidden');
+        if (currentQuestionIndex === currentQuestions.length - 1) {
+            nextQuestionBtn.textContent = 'Ver Resultados';
+        } else {
+            nextQuestionBtn.textContent = 'Próxima Questão';
+        }
+    }
+
+    function updateScore() {
+        scoreEl.textContent = score;
+    }
+    
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentQuestions.length) {
+            displayQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        quizContainer.classList.add('hidden');
+        quizResults.classList.remove('hidden');
+        document.getElementById('final-score').textContent = score;
+        document.getElementById('total-score').textContent = currentQuestions.length;
+    }
+
+    function resetQuiz() {
+        quizContainer.classList.add('hidden');
+        quizResults.classList.add('hidden');
+        quizSetup.classList.remove('hidden');
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+    
+    function showHintModal(e) {
+        const hintId = e.target.dataset.hintId;
+        const hintSection = document.getElementById(hintId);
+        if (hintSection) {
+            hintContent.innerHTML = hintSection.innerHTML;
+            hintModal.classList.remove('hidden');
+        }
+    }
+
+    function closeHint() {
+        hintModal.classList.add('hidden');
+    }
+
+    startQuizBtn.addEventListener('click', startQuiz);
+    nextQuestionBtn.addEventListener('click', nextQuestion);
+    restartQuizBtn.addEventListener('click', startQuiz);
+    playAgainBtn.addEventListener('click', resetQuiz);
+    showHintBtn.addEventListener('click', showHintModal);
+    closeHintModalBtn.addEventListener('click', closeHint);
+    hintModal.addEventListener('click', (e) => {
+        if (e.target === hintModal) {
+            closeHint();
+        }
+    });
+
+    setupNavigation();
+    populateTopicSelection();
+});
+</script>
+
+</body>
+</html>
