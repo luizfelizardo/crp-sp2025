@@ -79,7 +79,3 @@ Ficarei feliz em analisar sua contribuição!
 
 👤 Autor
 Feito com ❤️ por Luiz.Dev
-
-
-👤 Autor
-Feito com ❤️ por [Seu Nome]
