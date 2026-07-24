@@ -1,6 +1,6 @@
 🧠 Quiz Gabaritando - Concurso CRP-SP
 
-Acesse: https://crpsp2025.luizcodedev.tech/
+Acesse: https://crpsp.netlify.app/
 
 
 Um quiz interativo desenvolvido para auxiliar psicólogos e estudantes na preparação para o concurso do Conselho Regional de Psicologia de São Paulo (CRP-SP). Teste seus conhecimentos com perguntas baseadas em editais anteriores e nos temas mais relevantes para a prova.
